@@ -2,11 +2,12 @@ const express = require("express");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./swagger");
 const dotenv = require("dotenv");
-const database = require("./database");
 const cors = require("cors");
+const path = require("path"); // Import the 'path' module
 
 const usersRouter = require("./routes/users");
 const authRouter = require("./routes/auth");
+const dealsRouter = require("./routes/deals");
 
 dotenv.config();
 
@@ -14,9 +15,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-app.use("/api", usersRouter);
-app.use("/api", authRouter);
+// Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, "public")));
+
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("", usersRouter);
+app.use("", authRouter);
+app.use("", dealsRouter);
 
 const PORT = process.env.PORT || 3001;
 

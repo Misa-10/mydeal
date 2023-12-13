@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { IoIosEye, IoIosEyeOff } from "react-icons/io";
 
 const Modal = ({ onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -11,6 +12,8 @@ const Modal = ({ onClose }) => {
     email: "",
     password: "",
   });
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/; // Regex for a valid username
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Regex for a valid email address
@@ -62,8 +65,8 @@ const Modal = ({ onClose }) => {
     }
 
     const url = isLogin
-      ? "http://localhost:3001/api/auth/login"
-      : "http://localhost:3001/api/users";
+      ? "http://localhost:3001/auth/login"
+      : "http://localhost:3001/users";
 
     // Use formData for the request
     const options = {
@@ -91,6 +94,10 @@ const Modal = ({ onClose }) => {
         console.error(error);
         showToast("error", "Une erreur est survenue");
       });
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -175,18 +182,31 @@ const Modal = ({ onClose }) => {
               />
             </div>
 
-            <div className="mb-4">
+            <div className="mb-4 relative">
               <label htmlFor="newPassword" className="block text-text mb-1">
                 Mot de passe:
               </label>
-              <input
-                type="password"
-                id="newPassword"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className="w-full p-2 rounded bg-fade text-text focus:outline-none"
-              />
+              <div className="flex items-center">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="newPassword"
+                  name="newPassword"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className="w-full p-2 rounded bg-fade text-text focus:outline-none pr-10" // Add right padding for the icon
+                />
+                {showPassword ? (
+                  <IoIosEyeOff
+                    className="absolute right-2 transform  text-primary cursor-pointer text-xl"
+                    onClick={togglePasswordVisibility}
+                  />
+                ) : (
+                  <IoIosEye
+                    className="absolute right-2 transform text-primary cursor-pointer text-xl"
+                    onClick={togglePasswordVisibility}
+                  />
+                )}
+              </div>
             </div>
 
             <button

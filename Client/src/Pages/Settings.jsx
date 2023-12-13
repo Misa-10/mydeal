@@ -4,6 +4,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
+import { IoIosEye, IoIosEyeOff } from "react-icons/io";
 
 const Settings = () => {
   const [formData, setFormData] = useState({
@@ -12,6 +13,8 @@ const Settings = () => {
     currentPassword: "",
     newPassword: "",
   });
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -95,7 +98,7 @@ const Settings = () => {
     console.log(updatedField);
     const options = {
       method: "PUT",
-      url: `http://localhost:3001/api/users/${decodedToken.id}`,
+      url: `http://localhost:3001/users/${decodedToken.id}`,
       data: updatedField,
     };
 
@@ -121,7 +124,7 @@ const Settings = () => {
 
     const options = {
       method: "DELETE",
-      url: `http://localhost:3001/api/users/${decodedToken.id}`,
+      url: `http://localhost:3001/users/${decodedToken.id}`,
     };
 
     axios
@@ -135,6 +138,10 @@ const Settings = () => {
         console.error(error);
         showToast("error", "Une erreur s'est produite.");
       });
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -190,26 +197,30 @@ const Settings = () => {
             </div>
           </div>
 
-          <div className="mb-4">
+          <div className="mb-4 relative">
             <label htmlFor="newPassword" className="block text-text mb-1">
               New Password:
             </label>
             <div className="flex items-center">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 id="newPassword"
                 name="newPassword"
                 value={formData.newPassword}
                 onChange={handleInputChange}
-                className="w-full p-2 rounded bg-fade text-text focus:outline-none"
+                className="w-full p-2 rounded bg-fade text-text focus:outline-none pr-10" // Add right padding for the icon
               />
-              <button
-                type="button"
-                onClick={(e) => handleSubmit(e, "newPassword")}
-                className="bg-primary text-text px-4 py-2 rounded hover:bg-accent focus:outline-none ml-2"
-              >
-                Save
-              </button>
+              {showPassword ? (
+                <IoIosEyeOff
+                  className="absolute right-2 transform  text-primary cursor-pointer text-xl"
+                  onClick={togglePasswordVisibility}
+                />
+              ) : (
+                <IoIosEye
+                  className="absolute right-2 transform text-primary cursor-pointer text-xl"
+                  onClick={togglePasswordVisibility}
+                />
+              )}
             </div>
           </div>
 

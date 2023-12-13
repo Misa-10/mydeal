@@ -49,9 +49,21 @@ const Navbar = () => {
 
       {isLogin ? (
         <div className="flex items-center space-x-4">
+          <button
+            className="bg-primary text-text py-2 px-4 rounded hover:bg-accent focus:outline-none"
+            onClick={() => navigate("/deal/create")}
+          >
+            Créer un Deal
+          </button>
+          <button
+            className="bg-primary text-text py-2 px-4 rounded hover:bg-accent focus:outline-none"
+            onClick={() => navigate("/promo/create")}
+          >
+            Créer un Code Promo
+          </button>
           <div className="rounded-full overflow-hidden w-12 h-12">
             <img
-              src="http://localhost:3000/profile.png"
+              src="http://localhost:3000/Avatar/Dog.jpeg"
               alt="Profile"
               className="w-full h-full object-cover"
             />

@@ -10,6 +10,7 @@ module.exports = {
         secondary: "#0b0e28",
         accent: "#3745c8",
         fade: "rgba(255, 255, 255, 0.03)",
+        disabledBackground: "#2c37a0",
         variant: {
           50: "#ebecfa",
           100: "#d7daf4",

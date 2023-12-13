@@ -2,12 +2,13 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { getUserByEmail } = require("./users");
+const { development } = require("../knexfile");
+const db = require("knex")(development);
 const { emailRegex, passwordRegex } = require("./regex");
 
 /**
  * @swagger
- * /api/auth/login:
+ * /auth/login:
  *   post:
  *     summary: Authenticate a user
  *     tags: [Authentication]
@@ -38,8 +39,6 @@ const { emailRegex, passwordRegex } = require("./regex");
  *         description: Internal Server Error
  */
 
-// Include this Swagger definition within your existing Swagger setup
-
 router.post("/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -54,20 +53,24 @@ router.post("/auth/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid password format." });
     }
 
-    // Find user by email
-    const user = await getUserByEmail(email);
+    // Find user by email using Knex
+    const user = await db
+      .select("id", "email", "username", "password")
+      .from("users")
+      .where("email", email)
+      .first();
 
     // Check if the user exists
     if (!user) {
-      return res.status(401).json({ message: "Invalid email or password." });
+      return res.status(401).json({ message: "Invalid email." });
     }
 
     // Check if the password is correct
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
-      return res.status(401).json({ message: "Invalid email or password." });
+      return res.status(401).json({ message: "Invalid password." });
     }
-    console.log(user);
+
     // Generate JWT token
     const token = jwt.sign(
       { email: user.email, username: user.username, id: user.id },

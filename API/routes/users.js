@@ -1,7 +1,10 @@
+// users.js
+
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
-const connection = require("../database");
+const { development } = require("../knexfile");
+const db = require("knex")(development);
 const jwt = require("jsonwebtoken");
 const { emailRegex, passwordRegex, usernameRegex } = require("./regex");
 
@@ -14,7 +17,7 @@ const { emailRegex, passwordRegex, usernameRegex } = require("./regex");
 
 /**
  * @swagger
- * /api/users:
+ * /users:
  *   post:
  *     summary: Create a new user
  *     tags: [Users]
@@ -66,7 +69,7 @@ router.post("/users", async (req, res) => {
     }
 
     // Vérifiez si l'utilisateur existe déjà
-    const existingUser = await getUserByEmail(email);
+    const existingUser = await db("users").where("email", email).first();
     if (existingUser) {
       return res.status(400).json({ message: "L'utilisateur existe déjà." });
     }
@@ -75,18 +78,24 @@ router.post("/users", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Insérer l'utilisateur dans la base de données
-    const result = await insertUser(email, hashedPassword, username);
+    const [userId] = await db("users")
+      .insert({
+        email,
+        password: hashedPassword,
+        username,
+      })
+      .returning("id");
 
     // Generate JWT token
     const token = jwt.sign(
-      { email, username, id: result.insertId },
+      { email, username, id: userId },
       process.env.JWT_SECRET,
       {
         expiresIn: "200h",
       }
     );
 
-    res.status(201).json({ id: result.insertId, token });
+    res.status(201).json({ id: userId, token });
   } catch (error) {
     console.error("Erreur lors de la création de l'utilisateur :", error);
     res.status(500).send("Erreur du serveur");
@@ -95,7 +104,7 @@ router.post("/users", async (req, res) => {
 
 /**
  * @swagger
- * /api/users:
+ * /users:
  *   get:
  *     summary: Get a list of users
  *     tags: [Users]
@@ -120,7 +129,9 @@ router.post("/users", async (req, res) => {
 // Read Users
 router.get("/users", async (req, res) => {
   try {
-    const users = await getUsers();
+    const users = await db
+      .select("id", "email", "username", "date_creation")
+      .from("users");
     res.json(users);
   } catch (error) {
     console.error("Erreur lors de la récupération des utilisateurs :", error);
@@ -130,7 +141,7 @@ router.get("/users", async (req, res) => {
 
 /**
  * @swagger
- * /api/users/by-email:
+ * /users/by-email:
  *   get:
  *     summary: Get a user by email
  *     tags: [Users]
@@ -164,7 +175,7 @@ router.get("/users", async (req, res) => {
 router.get("/users/by-email", async (req, res) => {
   try {
     const userEmail = req.query.email;
-    const user = await getUserByEmail(userEmail);
+    const user = await db("users").where("email", userEmail).first();
 
     if (!user) {
       return res.status(404).json({ message: "Utilisateur non trouvé." });
@@ -182,7 +193,7 @@ router.get("/users/by-email", async (req, res) => {
 
 /**
  * @swagger
- * /api/users/{id}:
+ * /users/{id}:
  *   get:
  *     summary: Get a user by ID
  *     tags: [Users]
@@ -216,7 +227,7 @@ router.get("/users/by-email", async (req, res) => {
 router.get("/users/:id", async (req, res) => {
   try {
     const userId = req.params.id;
-    const user = await getUserById(userId);
+    const user = await db("users").where("id", userId).first();
 
     if (!user) {
       return res.status(404).json({ message: "Utilisateur non trouvé." });
@@ -234,7 +245,7 @@ router.get("/users/:id", async (req, res) => {
 
 /**
  * @swagger
- * /api/users/{id}:
+ * /users/{id}:
  *   put:
  *     summary: Update a user by ID
  *     tags: [Users]
@@ -288,13 +299,18 @@ router.put("/users/:id", async (req, res) => {
     }
 
     // Vérifier si l'utilisateur existe
-    const existingUser = await getUserById(userId);
+    const existingUser = await db("users").where("id", userId).first();
     if (!existingUser) {
       return res.status(404).json({ message: "Utilisateur non trouvé." });
     }
 
     // Mettre à jour l'utilisateur dans la base de données
-    await updateUser(userId, email, password, username);
+    let updateFields = {};
+    if (email) updateFields.email = email;
+    if (password) updateFields.password = password;
+    if (username) updateFields.username = username;
+
+    await db("users").where("id", userId).update(updateFields);
 
     // Generate JWT token with ternary conditional for email field
     const token = jwt.sign(
@@ -320,7 +336,7 @@ router.put("/users/:id", async (req, res) => {
 
 /**
  * @swagger
- * /api/users/{id}:
+ * /users/{id}:
  *   delete:
  *     summary: Delete a user by ID
  *     tags: [Users]
@@ -343,13 +359,13 @@ router.delete("/users/:id", async (req, res) => {
     const userId = req.params.id;
 
     // Vérifier si l'utilisateur existe
-    const existingUser = await getUserById(userId);
+    const existingUser = await db("users").where("id", userId).first();
     if (!existingUser) {
       return res.status(404).json({ message: "Utilisateur non trouvé." });
     }
 
     // Supprimer l'utilisateur de la base de données
-    await deleteUser(userId);
+    await db("users").where("id", userId).del();
 
     res.status(200).json({ message: "Utilisateur supprimé avec succès." });
   } catch (error) {
@@ -358,124 +374,4 @@ router.delete("/users/:id", async (req, res) => {
   }
 });
 
-// Helper functions
-async function getUserByEmail(email) {
-  return new Promise((resolve, reject) => {
-    connection.query(
-      "SELECT * FROM users WHERE email = ?",
-      [email],
-      (error, results) => {
-        if (error) {
-          return reject(error);
-        }
-        resolve(results[0]);
-      }
-    );
-  });
-}
-
-async function insertUser(email, hashedPassword, username) {
-  return new Promise((resolve, reject) => {
-    connection.query(
-      "INSERT INTO users (email, password, username) VALUES (?, ?, ?)",
-      [email, hashedPassword, username],
-      (error, results) => {
-        if (error) {
-          return reject(error);
-        }
-        resolve(results);
-      }
-    );
-  });
-}
-
-async function getUsers() {
-  return new Promise((resolve, reject) => {
-    connection.query(
-      "SELECT id, email,username, date_creation FROM users",
-      (error, results) => {
-        if (error) {
-          return reject(error);
-        }
-        resolve(results);
-      }
-    );
-  });
-}
-
-// Helper function
-async function getUserById(id) {
-  return new Promise((resolve, reject) => {
-    connection.query(
-      "SELECT * FROM users WHERE id = ?",
-      [id],
-      (error, results) => {
-        if (error) {
-          return reject(error);
-        }
-        resolve(results[0]);
-      }
-    );
-  });
-}
-
-// Helper function
-async function updateUser(id, email, password, username) {
-  return new Promise((resolve, reject) => {
-    let updateFields = [];
-    let updateValues = [];
-
-    if (email) {
-      updateFields.push("email = ?");
-      updateValues.push(email);
-    }
-
-    if (password) {
-      updateFields.push("password = ?");
-      updateValues.push(password);
-    }
-
-    if (username) {
-      updateFields.push("username = ?");
-      updateValues.push(username);
-    }
-
-    // Check if any fields are provided before executing the query
-    if (updateFields.length === 0) {
-      return reject(new Error("No fields provided for update."));
-    }
-
-    // Add the id to the values array
-    updateValues.push(id);
-
-    // Construct the final SQL query
-    const sqlQuery = `UPDATE users SET ${updateFields.join(", ")} WHERE id = ?`;
-
-    connection.query(sqlQuery, updateValues, (error, results) => {
-      if (error) {
-        return reject(error);
-      }
-      resolve(results);
-    });
-  });
-}
-
-// Helper function
-async function deleteUser(id) {
-  return new Promise((resolve, reject) => {
-    connection.query(
-      "DELETE FROM users WHERE id = ?",
-      [id],
-      (error, results) => {
-        if (error) {
-          return reject(error);
-        }
-        resolve(results);
-      }
-    );
-  });
-}
-
 module.exports = router;
-
-module.exports.getUserByEmail = getUserByEmail;
