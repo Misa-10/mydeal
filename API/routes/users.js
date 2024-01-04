@@ -88,7 +88,7 @@ router.post("/users", async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { email, username, id: userId },
+      { email, username, id: userId, avatar: null },
       process.env.JWT_SECRET,
       {
         expiresIn: "200h",
@@ -130,7 +130,7 @@ router.post("/users", async (req, res) => {
 router.get("/users", async (req, res) => {
   try {
     const users = await db
-      .select("id", "email", "username", "date_creation")
+      .select("id", "email", "username", "date_creation", "avatar")
       .from("users");
     res.json(users);
   } catch (error) {
@@ -279,7 +279,7 @@ router.get("/users/:id", async (req, res) => {
 router.put("/users/:id", async (req, res) => {
   try {
     const userId = req.params.id;
-    const { email, password, username } = req.body;
+    const { email, password, username, avatar } = req.body;
 
     // Validation de l'email
     if (email && !emailRegex.test(email)) {
@@ -309,6 +309,7 @@ router.put("/users/:id", async (req, res) => {
     if (email) updateFields.email = email;
     if (password) updateFields.password = password;
     if (username) updateFields.username = username;
+    if (avatar) updateFields.avatar = avatar;
 
     await db("users").where("id", userId).update(updateFields);
 
@@ -318,6 +319,7 @@ router.put("/users/:id", async (req, res) => {
         email: email ? email : existingUser.email,
         username: username ? username : existingUser.username,
         id: userId,
+        avatar: avatar ? avatar : existingUser.avatar,
       },
       process.env.JWT_SECRET,
       {

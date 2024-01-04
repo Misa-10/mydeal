@@ -68,7 +68,6 @@ const Modal = ({ onClose }) => {
       ? "http://localhost:3001/auth/login"
       : "http://localhost:3001/users";
 
-    // Use formData for the request
     const options = {
       method: "POST",
       url: url,
@@ -78,7 +77,6 @@ const Modal = ({ onClose }) => {
     axios
       .request(options)
       .then(function (response) {
-        console.log(response.data);
         const { token } = response.data;
 
         // Save the token to localStorage or a secure storage method
@@ -101,7 +99,7 @@ const Modal = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center">
+    <div className="fixed inset-0 flex items-center justify-center z-10">
       <div className="bg-background bg-opacity-75 absolute inset-0"></div>
       <div className="bg-secondary p-6 rounded-lg z-10 relative">
         <div className="flex justify-end">
@@ -167,6 +165,9 @@ const Modal = ({ onClose }) => {
                 onChange={handleInputChange}
                 className="w-full p-2 rounded bg-fade text-text focus:outline-none"
               />
+              <ul className="list-disc pl-5 mt-1 text-sm text-text">
+                <li>3 à 20 caractères alphanumériques</li>
+              </ul>
             </div>
             <div className="mb-4">
               <label htmlFor="email" className="block text-text mb-1">
@@ -190,7 +191,7 @@ const Modal = ({ onClose }) => {
                 <input
                   type={showPassword ? "text" : "password"}
                   id="newPassword"
-                  name="newPassword"
+                  name="password"
                   value={formData.password}
                   onChange={handleInputChange}
                   className="w-full p-2 rounded bg-fade text-text focus:outline-none pr-10" // Add right padding for the icon
@@ -207,6 +208,12 @@ const Modal = ({ onClose }) => {
                   />
                 )}
               </div>
+              <ul className="list-disc pl-5 mt-1 text-sm text-text">
+                <li>Au moins 8 caractères</li>
+                <li>Au moins une lettre</li>
+                <li>Au moins un chiffre</li>
+                <li>Au moins une majuscule</li>
+              </ul>
             </div>
 
             <button

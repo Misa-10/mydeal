@@ -2,23 +2,29 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import DealCard from "../Components/DealCard";
+import Pagination from "../Components/Pagination";
 
 const Home = () => {
   const [deals, setDeals] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(20);
+
+  const fetchDeals = async (page) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/deals?page=${page}`
+      );
+
+      setDeals(response.data.deals);
+      setTotalPages(response.data.totalPages);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des deals :", error);
+    }
+  };
 
   useEffect(() => {
-    // Effectuez la requête pour obtenir la liste des deals depuis votre API
-    const fetchDeals = async () => {
-      try {
-        const response = await axios.get("http://localhost:3001/deals");
-        setDeals(response.data);
-      } catch (error) {
-        console.error("Erreur lors de la récupération des deals :", error);
-      }
-    };
-
-    fetchDeals();
-  }, []); // Assurez-vous de ne déclencher cette requête qu'une seule fois (au montage du composant)
+    fetchDeals(currentPage);
+  }, [currentPage]);
 
   return (
     <div className="bg-background text-text">
@@ -31,6 +37,11 @@ const Home = () => {
           ))}
         </div>
       </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

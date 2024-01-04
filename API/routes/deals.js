@@ -30,8 +30,20 @@ const path = require("path");
  */
 router.get("/deals", async (req, res) => {
   try {
-    const deals = await db.select("*").from("deals");
-    res.json(deals);
+    const { page = 1, pageSize = 2 } = req.query;
+    const offset = (page - 1) * pageSize;
+
+    const deals = await db
+      .select("*")
+      .from("deals")
+      .offset(offset)
+      .limit(pageSize);
+
+    const totalCount = await db("deals").count("*").first();
+
+    const totalPages = Math.ceil(totalCount.count / pageSize);
+
+    res.json({ deals, totalPages });
   } catch (error) {
     console.error("Erreur lors de la récupération des deals : ", error);
     res.status(500).send("Erreur serveur");
@@ -99,7 +111,7 @@ router.get("/deals/:id", async (req, res) => {
 router.post("/deals", async (req, res) => {
   try {
     const deal = req.body;
-    await db("deals").insert(deal);
+    await db("deals").insert(deal).returning("id");
     res.status(201).send("Deal créé avec succès");
   } catch (error) {
     console.error("Erreur lors de la création du deal : ", error);
@@ -217,7 +229,7 @@ router.delete("/deals/:id", async (req, res) => {
 // Configurez le middleware multer pour gérer le téléchargement des images
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join("public", "img"));
+    cb(null, path.join("public", "images"));
   },
   filename: (req, file, cb) => {
     const dealId = req.body.dealId || "unknown";

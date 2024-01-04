@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
+import Auth from "../../Middleware/Auth";
 
 const CreateDeal = () => {
   const [isPermanent, setIsPermanent] = useState(false);
@@ -23,23 +24,16 @@ const CreateDeal = () => {
   });
 
   const [currentPage, setCurrentPage] = useState(1);
-
   const [imagePreviews, setImagePreviews] = useState([]);
 
   const navigate = useNavigate();
 
-  const [dateFieldsDisabled, setDateFieldsDisabled] = useState(false);
-
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-
-    if (type === "checkbox") {
-      setFormData({ ...formData, [name]: checked });
-      setIsPermanent(checked);
-      setDateFieldsDisabled(checked); // Désactive les champs de date et d'heure si la case est cochée
-    } else {
-      setFormData({ ...formData, [name]: value });
+    if (e.target.name === "permanent") {
+      setIsPermanent(e.target.value === "true");
     }
+
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleImageChange = (e) => {
@@ -67,7 +61,6 @@ const CreateDeal = () => {
       formDataImages.push(file);
     }
 
-    // Assurez-vous que formData.images est initialisé comme un tableau
     formDataImages = formDataImages || [];
 
     setFormData({ ...formData, images: formDataImages });
@@ -96,7 +89,6 @@ const CreateDeal = () => {
     e.preventDefault();
 
     try {
-      // Envoie les images et récupère les URL
       const imageUrls = await uploadImages();
 
       const jwtToken = localStorage.getItem("jwtToken");
@@ -106,7 +98,6 @@ const CreateDeal = () => {
       const formattedStartDate = `${formData.start_date} ${formData.start_time}:00+00`;
       const formattedEndDate = `${formData.end_date} ${formData.end_time}:00+00`;
 
-      // Met à jour les données du deal avec les URL des images
       const dealDataWithImages = {
         title: formData.title,
         description: formData.description,
@@ -124,15 +115,13 @@ const CreateDeal = () => {
         creator_id: parseInt(user_id),
       };
 
-      // Envoie les données du deal au serveur
       const response = await axios.post(
         "http://localhost:3001/deals",
         dealDataWithImages
       );
-
+      console.log(response.data);
       navigate(`/deals/${response.data.id}`);
       showToast("success", "Deal créé avec succès");
-      console.log("Deal créé avec succès :", response.data);
     } catch (error) {
       showToast("error", "Erreur lors de la création du deal");
       console.error("Erreur lors de la création du deal :", error);
@@ -152,10 +141,8 @@ const CreateDeal = () => {
         formDataToUpload
       );
 
-      // Récupère les noms de fichier des images téléchargées
       const filenames = response.data.filenames;
 
-      // Construit les URL complètes des images téléchargées
       const imageUrls = filenames.map((filename) => `${filename}`);
 
       return imageUrls;
@@ -221,98 +208,99 @@ const CreateDeal = () => {
                 />
               </div>
               <div className="mb-4">
-                <label
-                  htmlFor="isPermanent"
-                  className="block text-sm font-medium text-text"
-                >
-                  Deal Permanent
-                </label>
-                <input
-                  type="checkbox"
-                  id="isPermanent"
-                  name="permanent"
-                  checked={isPermanent}
-                  onChange={handleChange}
-                  className="ml-2"
-                />
+                <div className="flex items-center">
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="permanent"
+                      value="true"
+                      checked={isPermanent}
+                      onChange={handleChange}
+                      className="form-radio h-5 w-5 text-primary"
+                    />
+                    <span className="ml-2 text-text">Permanent</span>
+                  </label>
+                  <label className="inline-flex items-center ml-4">
+                    <input
+                      type="radio"
+                      name="permanent"
+                      value="false"
+                      checked={!isPermanent}
+                      onChange={handleChange}
+                      className="form-radio h-5 w-5 text-primary"
+                    />
+                    <span className="ml-2 text-text">Non Permanent</span>
+                  </label>
+                </div>
               </div>
-              <div className="mb-4">
-                <label
-                  htmlFor="start_date"
-                  className="block text-sm font-medium text-text"
-                >
-                  Date de début
-                </label>
-                <input
-                  type="date"
-                  id="start_date"
-                  name="start_date"
-                  value={formData.start_date}
-                  onChange={handleChange}
-                  className={`w-full p-2 rounded bg-fade text-text focus:outline-none dark:[color-scheme:dark] ${
-                    dateFieldsDisabled ? "bg-disabledBackground" : ""
-                  }`}
-                  disabled={dateFieldsDisabled}
-                />
-              </div>
-              <div className="mb-4">
-                <label
-                  htmlFor="end_date"
-                  className="block text-sm font-medium text-text"
-                >
-                  Date de fin
-                </label>
-                <input
-                  type="date"
-                  id="end_date"
-                  name="end_date"
-                  value={formData.end_date}
-                  onChange={handleChange}
-                  className={`w-full p-2 rounded bg-fade text-text focus:outline-none dark:[color-scheme:dark] ${
-                    dateFieldsDisabled ? "bg-disabledBackground" : ""
-                  }`}
-                  disabled={dateFieldsDisabled}
-                />
-              </div>
-              <div className="mb-4">
-                <label
-                  htmlFor="start_time"
-                  className="block text-sm font-medium text-text"
-                >
-                  Heure de début
-                </label>
-                <input
-                  type="time"
-                  id="start_time"
-                  name="start_time"
-                  value={formData.start_time}
-                  onChange={handleChange}
-                  className={`w-full p-2 rounded bg-fade text-text focus:outline-none dark:[color-scheme:dark] ${
-                    dateFieldsDisabled ? "bg-disabledBackground" : ""
-                  }`}
-                  disabled={dateFieldsDisabled}
-                />
-              </div>
-
-              <div className="mb-4">
-                <label
-                  htmlFor="end_time"
-                  className="block text-sm font-medium text-text"
-                >
-                  Heure de fin
-                </label>
-                <input
-                  type="time"
-                  id="end_time"
-                  name="end_time"
-                  value={formData.end_time}
-                  onChange={handleChange}
-                  className={`w-full p-2 rounded bg-fade text-text focus:outline-none dark:[color-scheme:dark] ${
-                    dateFieldsDisabled ? "bg-disabledBackground" : ""
-                  }`}
-                  disabled={dateFieldsDisabled}
-                />
-              </div>
+              {!isPermanent && (
+                <>
+                  <div className="mb-4">
+                    <label
+                      htmlFor="start_date"
+                      className="block text-sm font-medium text-text"
+                    >
+                      Date de début
+                    </label>
+                    <input
+                      type="date"
+                      id="start_date"
+                      name="start_date"
+                      value={formData.start_date}
+                      onChange={handleChange}
+                      className={`w-full p-2 rounded bg-fade text-text focus:outline-none dark:[color-scheme:dark]`}
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label
+                      htmlFor="end_date"
+                      className="block text-sm font-medium text-text"
+                    >
+                      Date de fin
+                    </label>
+                    <input
+                      type="date"
+                      id="end_date"
+                      name="end_date"
+                      value={formData.end_date}
+                      onChange={handleChange}
+                      className={`w-full p-2 rounded bg-fade text-text focus:outline-none dark:[color-scheme:dark] `}
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label
+                      htmlFor="start_time"
+                      className="block text-sm font-medium text-text"
+                    >
+                      Heure de début
+                    </label>
+                    <input
+                      type="time"
+                      id="start_time"
+                      name="start_time"
+                      value={formData.start_time}
+                      onChange={handleChange}
+                      className={`w-full p-2 rounded bg-fade text-text focus:outline-none dark:[color-scheme:dark]`}
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label
+                      htmlFor="end_time"
+                      className="block text-sm font-medium text-text"
+                    >
+                      Heure de fin
+                    </label>
+                    <input
+                      type="time"
+                      id="end_time"
+                      name="end_time"
+                      value={formData.end_time}
+                      onChange={handleChange}
+                      className={`w-full p-2 rounded bg-fade text-text focus:outline-none dark:[color-scheme:dark]`}
+                    />
+                  </div>
+                </>
+              )}
             </div>
             <div className="w-full md:w-1/2 pl-4">
               <div className="mb-4">
@@ -474,4 +462,4 @@ const CreateDeal = () => {
   );
 };
 
-export default CreateDeal;
+export default Auth(CreateDeal);

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { jwtDecode } from "jwt-decode";
+import Auth from "../../Middleware/Auth";
 
 const EditDeal = () => {
   const [formData, setFormData] = useState({
@@ -51,19 +53,23 @@ const EditDeal = () => {
             .split("T")[1]
             .slice(0, 5),
         };
-        setFormData(formattedData);
+
+        const images = [
+          response.data.image1,
+          response.data.image2,
+          response.data.image3,
+        ].filter((image) => image);
 
         setImagePreviews(
-          [response.data.image1, response.data.image2, response.data.image3]
-            .filter((image) => image)
-            .map((image) => `http://localhost:3001/img/${image}`)
+          images.map((image) => `http://localhost:3001/images/${image}`)
         );
+
+        setFormData({ ...formattedData, images });
       } catch (error) {
         console.error(
           "Erreur lors de la récupération des données du deal :",
           error
         );
-        // Gérez les erreurs de manière appropriée
       }
     };
 
@@ -103,7 +109,6 @@ const EditDeal = () => {
       formDataImages.push(file);
     }
 
-    // Assurez-vous que formData.images est initialisé comme un tableau
     formDataImages = formDataImages || [];
 
     setFormData({ ...formData, images: formDataImages });
@@ -126,20 +131,64 @@ const EditDeal = () => {
     e.preventDefault();
 
     try {
-      // Votre logique de soumission pour la modification (utilisez une requête API PUT)
-      const response = await axios.put(
-        `http://localhost:3001/deals/${id}`,
-        formData
-      );
+      const imageUrls = await uploadImages();
+
+      const jwtToken = localStorage.getItem("jwtToken");
+      const decoded = jwtToken ? jwtDecode(jwtToken) : null;
+      const user_id = decoded.id;
+
+      const formattedStartDate = `${formData.start_date} ${formData.start_time}:00+00`;
+      const formattedEndDate = `${formData.end_date} ${formData.end_time}:00+00`;
+
+      const dealDataWithImages = {
+        title: formData.title,
+        description: formData.description,
+        start_date: formData.permanent == false ? formattedStartDate : null,
+        end_date: formData.permanent == false ? formattedEndDate : null,
+        price: formData.price,
+        link: formData.link,
+        shipping_cost: formData.shipping_cost,
+        base_price: formData.base_price,
+        brand: formData.brand,
+        image1: imageUrls[0] || null,
+        image2: imageUrls[1] || null,
+        image3: imageUrls[2] || null,
+        permanent: formData.permanent,
+        creator_id: parseInt(user_id),
+      };
+
+      await axios.put(`http://localhost:3001/deals/${id}`, dealDataWithImages);
 
       showToast("success", "Deal modifié avec succès");
-      console.log("Deal modifié avec succès :", response.data);
 
-      // Redirigez l'utilisateur vers la page de détails du deal ou ailleurs selon vos besoins
       navigate(`/deals/${id}`);
     } catch (error) {
       showToast("error", "Erreur lors de la modification du deal");
       console.error("Erreur lors de la modification du deal :", error);
+    }
+  };
+
+  const uploadImages = async () => {
+    try {
+      const formDataToUpload = new FormData();
+
+      for (let i = 0; i < formData.images.length; i++) {
+        formDataToUpload.append(`images`, formData.images[i]);
+      }
+
+      const response = await axios.post(
+        "http://localhost:3001/deals/upload-image",
+        formDataToUpload
+      );
+
+      const filenames = response.data.filenames;
+
+      const imageUrls = filenames.map((filename) => `${filename}`);
+
+      return imageUrls;
+    } catch (error) {
+      console.error("Erreur lors de l'envoi des images :", error);
+      throw new Error("Erreur lors de l'envoi des images");
     }
   };
 
@@ -452,7 +501,7 @@ const EditDeal = () => {
               type="submit"
               className="bg-primary text-text px-4 py-2 rounded hover:bg-accent focus:outline-none"
             >
-              Créer le Deal
+              Modifier le Deal
             </button>
           </form>
         )}
@@ -461,4 +510,4 @@ const EditDeal = () => {
   );
 };
 
-export default EditDeal;
+export default Auth(EditDeal);

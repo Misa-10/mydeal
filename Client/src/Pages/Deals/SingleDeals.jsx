@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaTruck } from "react-icons/fa";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { jwtDecode } from "jwt-decode";
 
 const SingleDeal = () => {
   const [deal, setDeal] = useState(null);
+  const [userId, setUserId] = useState(null);
   const { id } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDeal = async () => {
@@ -20,13 +24,52 @@ const SingleDeal = () => {
     fetchDeal();
   }, [id]);
 
+  useEffect(() => {
+    const jwtToken = localStorage.getItem("jwtToken");
+    const decodedToken = jwtToken ? jwtDecode(jwtToken) : null;
+    setUserId(decodedToken.id);
+  }, []);
+
   if (!deal) {
     return <div>Loading...</div>;
   }
 
-  // Formater les dates
   const startDate = new Date(deal.start_date).toLocaleDateString("fr-FR");
   const endDate = new Date(deal.end_date).toLocaleDateString("fr-FR");
+
+  const handleDeleteConfirmation = () => {
+    const isConfirmed = window.confirm(
+      "Êtes-vous sûr de vouloir supprimer ce deal ?"
+    );
+    if (isConfirmed) {
+      handleDeleteDeal();
+    }
+  };
+
+  const handleDeleteDeal = async () => {
+    try {
+      await axios.delete(`http://localhost:3001/deals/${id}`);
+      showToast("success", "Deal supprimé avec succès");
+      navigate("/");
+    } catch (error) {
+      showToast("error", "Erreur lors de la suppression du deal");
+      console.error("Erreur lors de la suppression du deal :", error);
+    }
+  };
+
+  const showToast = (type, message) => {
+    toast[type](message, {
+      position: toast.POSITION.TOP_RIGHT,
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      style: {
+        background: "#212a78",
+        color: "#fff",
+      },
+    });
+  };
 
   return (
     <div className="bg-background p-8 rounded-lg shadow-lg">
@@ -45,7 +88,7 @@ const SingleDeal = () => {
       </div>
 
       <img
-        src={`http://localhost:3001/img/${deal.image1}`}
+        src={`http://localhost:3001/images/${deal.image1}`}
         alt={`Deal ${deal.title}`}
         className="w-full max-h-96 object-cover rounded-lg mb-4"
       />
@@ -53,9 +96,13 @@ const SingleDeal = () => {
       <p className="text-text mb-4">{deal.description}</p>
 
       <div className="flex justify-between items-center mb-4">
-        <span className="text-lg text-primary">
-          Du {startDate} au {endDate}
-        </span>
+        {deal.permanent === false ? (
+          <span className="text-lg text-primary">
+            Du {startDate} au {endDate}
+          </span>
+        ) : deal.permanent === true ? (
+          <span className="text-lg text-primary">Offre permanente</span>
+        ) : null}
         <a
           href={deal.link}
           target="_blank"
@@ -64,14 +111,26 @@ const SingleDeal = () => {
         >
           Voir le deal
         </a>
-        <a
-          href={`/deal/edit/${deal.id}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-primary text-text px-4 py-2 rounded hover:bg-accent text-lg transition duration-300 ease-in-out transform hover:scale-105"
-        >
-          Modifier le deal
-        </a>
+        {userId === deal.creator_id && (
+          <>
+            <a
+              href={`/deal/edit/${deal.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-primary text-text px-4 py-2 rounded hover:bg-accent text-lg transition duration-300 ease-in-out transform hover:scale-105"
+            >
+              Modifier le deal
+            </a>
+            <div className="flex items-center">
+              <button
+                onClick={handleDeleteConfirmation}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 text-lg transition duration-300 ease-in-out transform hover:scale-105"
+              >
+                Supprimer le deal
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
       <p className="text-text">

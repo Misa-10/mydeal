@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { IoIosEye, IoIosEyeOff } from "react-icons/io";
+import Auth from "../Middleware/Auth";
 
 const Settings = () => {
   const [formData, setFormData] = useState({
@@ -12,17 +13,12 @@ const Settings = () => {
     email: "",
     currentPassword: "",
     newPassword: "",
+    avatar: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!localStorage.getItem("jwtToken")) {
-      navigate("/");
-    }
-  });
 
   const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -38,6 +34,8 @@ const Settings = () => {
         return emailRegex.test(formData.email);
       case "newPassword":
         return passwordRegex.test(formData.newPassword);
+      case "avatar":
+        return formData.avatar.length > 0;
       default:
         return false;
     }
@@ -54,7 +52,9 @@ const Settings = () => {
         email: decoded.email || "",
         currentPassword: "",
         newPassword: "",
+        avatar: decoded.avatar || "",
       });
+      setSelectedAvatar(decoded.avatar);
     }
   }, []);
 
@@ -95,7 +95,7 @@ const Settings = () => {
     const updatedField = {
       [field]: formData[field],
     };
-    console.log(updatedField);
+
     const options = {
       method: "PUT",
       url: `http://localhost:3001/users/${decodedToken.id}`,
@@ -144,11 +144,73 @@ const Settings = () => {
     setShowPassword(!showPassword);
   };
 
+  const BaseurlAvatar = "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=";
+
+  const NameAvatar = [
+    "Milo",
+    "Maggie",
+    "Daisy",
+    "Annie",
+    "Angel",
+    "Garfield",
+    "Abby",
+    "Bella",
+    "Buster",
+    "Gracie",
+    "Leo",
+    "Casper",
+    "Max",
+    "Chester",
+    "Bailey",
+    "Charlie",
+    "Kiki",
+    "Jasper",
+  ];
+
+  const [selectedAvatar, setSelectedAvatar] = useState("");
+
+  const handleAvatarSelect = (avatar) => {
+    setSelectedAvatar(avatar);
+    setFormData({
+      ...formData,
+      avatar: avatar,
+    });
+  };
+
   return (
     <div className="bg-background flex items-center justify-center h-he1">
       <div className="bg-secondary p-8 rounded-lg w-full max-w-md animate-fade-up animate-once animate-delay-100">
         <h2 className="text-3xl text-primary mb-4">Settings</h2>
         <form>
+          <div className="mb-4">
+            <h3 className="text-xl text-text mb-2">Choose Avatar:</h3>
+            <div className="flex flex-wrap gap-2">
+              {NameAvatar.map((name) => (
+                <div
+                  key={name}
+                  className={`cursor-pointer rounded-full overflow-hidden border-4 ${
+                    selectedAvatar === name
+                      ? "border-primary"
+                      : "border-transparent"
+                  }`}
+                  onClick={() => handleAvatarSelect(name)}
+                >
+                  <img
+                    src={`${BaseurlAvatar}${name}`}
+                    alt={name}
+                    className="w-10 h-10 object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={(e) => handleSubmit(e, "avatar")}
+              className="bg-primary text-text px-4 py-2 rounded hover:bg-accent focus:outline-none ml-2 mt-4"
+            >
+              Save
+            </button>
+          </div>
           <div className="mb-4">
             <label htmlFor="username" className="block text-text mb-1">
               Username:
@@ -237,4 +299,4 @@ const Settings = () => {
   );
 };
 
-export default Settings;
+export default Auth(Settings);

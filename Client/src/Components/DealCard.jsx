@@ -17,7 +17,7 @@ const DealCard = ({ deal }) => {
       <div className="flex justify-around items-center mb-4">
         <h2 className="text-2xl font-bold text-primary mb-2">{deal.title}</h2>
         <img
-          src={`http://localhost:3001/img/${deal.image1}`}
+          src={`http://localhost:3001/images/${deal.image1}`}
           alt={`Deal ${deal.title}`}
           className="w-20 h-20 object-cover rounded-lg mr-4"
         />
@@ -40,9 +40,14 @@ const DealCard = ({ deal }) => {
       </div>
 
       <div className="flex justify-between items-center">
-        <span className="text-lg text-primary">
-          Du {startDate} au {endDate}
-        </span>
+        {deal.permanent === false ? (
+          <span className="text-lg text-primary">
+            Du {startDate} au {endDate}
+          </span>
+        ) : deal.permanent === true ? (
+          <span className="text-lg text-primary">Offre permanente</span>
+        ) : null}
+
         <a
           href={deal.link}
           target="_blank"

@@ -2,20 +2,33 @@ import React, { useState, useEffect } from "react";
 import Modal from "./Modal";
 import { FiSettings, FiLogOut } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 const Navbar = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
+  const [userData, setUserData] = useState({
+    username: "",
+    email: "",
+    avatar: "",
+  });
+
   const navigate = useNavigate();
 
   useEffect(() => {
     const jwtToken = localStorage.getItem("jwtToken");
     if (jwtToken) {
       setIsLogin(true);
+      const decoded = jwtToken ? jwtDecode(jwtToken) : null;
+      setUserData({
+        username: decoded.username || "",
+        email: decoded.email || "",
+        avatar: decoded.avatar || "",
+      });
     } else {
       setIsLogin(false);
     }
-  });
+  }, []);
 
   const openModal = () => {
     setModalOpen(true);
@@ -28,6 +41,7 @@ const Navbar = () => {
   const handleLogout = () => {
     setIsLogin(false);
     localStorage.removeItem("jwtToken");
+    navigate("/");
   };
 
   return (
@@ -40,7 +54,6 @@ const Navbar = () => {
         onClick={() => navigate("/")}
       />
 
-      {/* Barre de recherche */}
       <input
         type="text"
         placeholder="Rechercher"
@@ -63,7 +76,7 @@ const Navbar = () => {
           </button>
           <div className="rounded-full overflow-hidden w-12 h-12">
             <img
-              src="http://localhost:3000/Avatar/Dog.jpeg"
+              src={`https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${userData.avatar}`}
               alt="Profile"
               className="w-full h-full object-cover"
             />
@@ -92,7 +105,6 @@ const Navbar = () => {
         </button>
       )}
 
-      {/* Modal for connection / account creation */}
       {isModalOpen && <Modal onClose={closeModal} />}
     </div>
   );
