@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../../axiosConfig";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
@@ -33,7 +33,7 @@ const EditDeal = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/deals/${id}`);
+        const response = await axios.get(`deals/${id}`);
         response.data.permanent && setIsPermanent(true);
 
         const formattedData = {
@@ -60,9 +60,7 @@ const EditDeal = () => {
           response.data.image3,
         ].filter((image) => image);
 
-        setImagePreviews(
-          images.map((image) => `http://localhost:3001/images/${image}`)
-        );
+        setImagePreviews(images.map((image) => `${BaseAPIurl}images/${image}`));
 
         setFormData({ ...formattedData, images });
       } catch (error) {
@@ -157,7 +155,7 @@ const EditDeal = () => {
         creator_id: parseInt(user_id),
       };
 
-      await axios.put(`http://localhost:3001/deals/${id}`, dealDataWithImages);
+      await axios.put(`deals/${id}`, dealDataWithImages);
 
       showToast("success", "Deal modifié avec succès");
 
@@ -176,10 +174,7 @@ const EditDeal = () => {
         formDataToUpload.append(`images`, formData.images[i]);
       }
 
-      const response = await axios.post(
-        "http://localhost:3001/deals/upload-image",
-        formDataToUpload
-      );
+      const response = await axios.post("deals/upload-image", formDataToUpload);
 
       const filenames = response.data.filenames;
 
@@ -213,6 +208,9 @@ const EditDeal = () => {
   const handlePrevPage = () => {
     setCurrentPage(1);
   };
+
+  // eslint-disable-next-line no-undef
+  const BaseAPIurl = process.env.REACT_APP_API_BASE_URL;
 
   return (
     <div className="bg-background flex items-center justify-center h-he1">

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axios from "../../axiosConfig";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
@@ -115,10 +115,7 @@ const CreateDeal = () => {
         creator_id: parseInt(user_id),
       };
 
-      const response = await axios.post(
-        "http://localhost:3001/deals",
-        dealDataWithImages
-      );
+      const response = await axios.post("deals", dealDataWithImages);
       console.log(response.data);
       navigate(`/deals/${response.data.id}`);
       showToast("success", "Deal créé avec succès");
@@ -136,10 +133,7 @@ const CreateDeal = () => {
         formDataToUpload.append(`images`, formData.images[i]);
       }
 
-      const response = await axios.post(
-        "http://localhost:3001/deals/upload-image",
-        formDataToUpload
-      );
+      const response = await axios.post("deals/upload-image", formDataToUpload);
 
       const filenames = response.data.filenames;
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../../axiosConfig";
 import { FaTruck } from "react-icons/fa";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -14,7 +14,7 @@ const SingleDeal = () => {
   useEffect(() => {
     const fetchDeal = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/deals/${id}`);
+        const response = await axios.get(`deals/${id}`);
         setDeal(response.data);
       } catch (error) {
         console.error("Erreur lors de la récupération du deal :", error);
@@ -48,7 +48,7 @@ const SingleDeal = () => {
 
   const handleDeleteDeal = async () => {
     try {
-      await axios.delete(`http://localhost:3001/deals/${id}`);
+      await axios.delete(`deals/${id}`);
       showToast("success", "Deal supprimé avec succès");
       navigate("/");
     } catch (error) {
@@ -71,6 +71,9 @@ const SingleDeal = () => {
     });
   };
 
+  // eslint-disable-next-line no-undef
+  const BaseAPIurl = process.env.REACT_APP_API_BASE_URL;
+
   return (
     <div className="bg-background p-8 rounded-lg shadow-lg">
       <h2 className="text-3xl font-bold text-primary mb-4">{deal.title}</h2>
@@ -88,7 +91,7 @@ const SingleDeal = () => {
       </div>
 
       <img
-        src={`http://localhost:3001/images/${deal.image1}`}
+        src={`${BaseAPIurl}images/${deal.image1}`}
         alt={`Deal ${deal.title}`}
         className="w-full max-h-96 object-cover rounded-lg mb-4"
       />

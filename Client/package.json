@@ -21,6 +21,8 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "start:dev": "react-scripts start --env=development",
+    "start:prod": "react-scripts start --env=production",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",

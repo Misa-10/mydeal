@@ -1,7 +1,7 @@
 // Home.jsx
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import DealCard from "../Components/DealCard";
+import axios from "../axiosConfig";
+import DealCard from "../Components/Deals/DealCard";
 import Pagination from "../Components/Pagination";
 
 const Home = () => {
@@ -11,9 +11,7 @@ const Home = () => {
 
   const fetchDeals = async (page) => {
     try {
-      const response = await axios.get(
-        `http://localhost:3001/deals?page=${page}`
-      );
+      const response = await axios.get(`deals?page=${page}`);
 
       setDeals(response.data.deals);
       setTotalPages(response.data.totalPages);
