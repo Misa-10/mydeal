@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
-import axios from "axios";
+import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
@@ -98,7 +98,7 @@ const Settings = () => {
 
     const options = {
       method: "PUT",
-      url: `http://localhost:3001/users/${decodedToken.id}`,
+      url: `users/${decodedToken.id}`,
       data: updatedField,
     };
 
@@ -124,7 +124,7 @@ const Settings = () => {
 
     const options = {
       method: "DELETE",
-      url: `http://localhost:3001/users/${decodedToken.id}`,
+      url: `users/${decodedToken.id}`,
     };
 
     axios
