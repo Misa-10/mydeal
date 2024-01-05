@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-import axios from "axios";
+import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { IoIosEye, IoIosEyeOff } from "react-icons/io";
@@ -64,9 +64,7 @@ const Modal = ({ onClose }) => {
       return;
     }
 
-    const url = isLogin
-      ? "http://localhost:3001/auth/login"
-      : "http://localhost:3001/users";
+    const url = isLogin ? "auth/login" : "users";
 
     const options = {
       method: "POST",

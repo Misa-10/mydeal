@@ -7,6 +7,9 @@ const DealCard = ({ deal }) => {
   const startDate = new Date(deal.start_date).toLocaleDateString("fr-FR");
   const endDate = new Date(deal.end_date).toLocaleDateString("fr-FR");
 
+  // eslint-disable-next-line no-undef
+  const BaseAPIurl = process.env.REACT_APP_API_BASE_URL;
+
   return (
     <div
       className="bg-secondary p-6 mb-6 rounded-lg shadow-lg hover:shadow-2xl transition duration-300 ease-in-out transform hover:scale-105 cursor-pointer"
@@ -17,7 +20,7 @@ const DealCard = ({ deal }) => {
       <div className="flex justify-around items-center mb-4">
         <h2 className="text-2xl font-bold text-primary mb-2">{deal.title}</h2>
         <img
-          src={`http://localhost:3001/images/${deal.image1}`}
+          src={`${BaseAPIurl}images/${deal.image1}`}
           alt={`Deal ${deal.title}`}
           className="w-20 h-20 object-cover rounded-lg mr-4"
         />
