@@ -4,6 +4,7 @@ const { development } = require("../knexfile");
 const db = require("knex")(development);
 const multer = require("multer");
 const path = require("path");
+const { put } = require("@vercel/blob");
 
 /**
  * @swagger
@@ -226,33 +227,49 @@ router.delete("/deals/:id", async (req, res) => {
  *       400:
  *         description: Requête invalide
  */
-// Configurez le middleware multer pour gérer le téléchargement des images
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join("public", "images"));
-  },
-  filename: (req, file, cb) => {
-    const dealId = req.body.dealId || "unknown";
-    const timestamp = Date.now();
-    const filename = `${dealId}-${timestamp}${path.extname(file.originalname)}`;
-    cb(null, filename);
-  },
-});
-
+const storage = multer.memoryStorage(); // Use memory storage for file buffer
 const upload = multer({ storage: storage });
 
-router.post("/deals/upload-image", upload.array("images", 3), (req, res) => {
-  try {
-    // Récupère les noms de fichier des images téléchargées
-    const filenames = req.files.map((file) => file.filename);
-    console.log("Fichiers téléchargés :", filenames);
+// Use multer middleware to handle the file uploads
+router.post(
+  "/deals/upload-image",
+  upload.array("images", 3),
+  async (req, res) => {
+    try {
+      // Check if req.files is available and not empty
+      if (!req.files || req.files.length === 0) {
+        throw new Error("No files uploaded");
+      }
 
-    // Renvoie les noms de fichier des images téléchargées
-    res.status(201).json({ filenames });
-  } catch (error) {
-    console.error("Erreur lors de l'upload des images :", error);
-    res.status(500).json({ error: "Erreur lors de l'upload des images" });
+      // Loop through each file and upload to blob storage
+      const uploadPromises = req.files.map(async (file) => {
+        const dealId = req.body.dealId || "unknown";
+        const timestamp = Date.now();
+        const filename = `${dealId}-${timestamp}${path.extname(
+          file.originalname
+        )}`;
+
+        // Use Vercel Blob put function to upload the file
+        const blob = await put(filename, file.buffer, {
+          access: "public",
+        });
+
+        // You may want to store the blob URLs or other information in your database
+        return blob.url;
+      });
+
+      // Wait for all uploads to complete
+      const blobUrls = await Promise.all(uploadPromises);
+
+      console.log("Files uploaded to Blob Storage:", blobUrls);
+
+      // Respond with the blob URLs or other relevant information
+      res.status(201).json({ blobUrls });
+    } catch (error) {
+      console.error("Error uploading images to Blob Storage:", error.message);
+      res.status(500).json({ error: "Error uploading images to Blob Storage" });
+    }
   }
-});
+);
 
 module.exports = router;

@@ -4,20 +4,25 @@ import { FaTruck } from "react-icons/fa";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
+import Loading from "../../Components/Loading";
 
 const SingleDeal = () => {
   const [deal, setDeal] = useState(null);
   const [userId, setUserId] = useState(null);
   const { id } = useParams();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchDeal = async () => {
       try {
+        setLoading(true);
         const response = await axios.get(`deals/${id}`);
         setDeal(response.data);
       } catch (error) {
         console.error("Erreur lors de la récupération du deal :", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -25,9 +30,11 @@ const SingleDeal = () => {
   }, [id]);
 
   useEffect(() => {
-    const jwtToken = localStorage.getItem("jwtToken");
-    const decodedToken = jwtToken ? jwtDecode(jwtToken) : null;
-    setUserId(decodedToken.id);
+    if (localStorage.getItem("jwtToken")) {
+      const jwtToken = localStorage.getItem("jwtToken");
+      const decodedToken = jwtToken ? jwtDecode(jwtToken) : null;
+      setUserId(decodedToken.id);
+    }
   }, []);
 
   if (!deal) {
@@ -139,6 +146,7 @@ const SingleDeal = () => {
       <p className="text-text">
         <span className="font-bold">Marque:</span> {deal.brand}
       </p>
+      {loading && <Loading />}
     </div>
   );
 };
