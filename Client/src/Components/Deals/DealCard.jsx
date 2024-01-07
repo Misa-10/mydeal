@@ -1,14 +1,27 @@
 // DealCard.jsx
 import React from "react";
 import { FaTruck } from "react-icons/fa";
+import { Buffer } from "buffer";
 
 const DealCard = ({ deal }) => {
-  // Formater les dates
   const startDate = new Date(deal.start_date).toLocaleDateString("fr-FR");
   const endDate = new Date(deal.end_date).toLocaleDateString("fr-FR");
 
-  // eslint-disable-next-line no-undef
-  const BaseAPIurl = process.env.REACT_APP_API_BASE_URL;
+  let image1;
+
+  if (deal.image1 === null) {
+    console.error("Image is null for deal:", deal);
+  } else if (
+    deal.image1 &&
+    typeof deal.image1 === "object" &&
+    deal.image1.data
+  ) {
+    image1 = Buffer.from(deal.image1.data, "binary").toString("base64");
+  } else {
+    console.error("Unsupported image format:", deal.image1);
+
+    throw new Error("Unsupported image format");
+  }
 
   return (
     <div
@@ -20,7 +33,7 @@ const DealCard = ({ deal }) => {
       <div className="flex justify-around items-center mb-4">
         <h2 className="text-2xl font-bold text-primary mb-2">{deal.title}</h2>
         <img
-          src={`${BaseAPIurl}images/${deal.image1}`}
+          src={`data:image/png;base64,${image1}`}
           alt={`Deal ${deal.title}`}
           className="w-20 h-20 object-cover rounded-lg mr-4"
         />

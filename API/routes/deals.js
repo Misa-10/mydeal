@@ -3,8 +3,6 @@ const router = express.Router();
 const { development } = require("../knexfile");
 const db = require("knex")(development);
 const multer = require("multer");
-const path = require("path");
-const { put } = require("@vercel/blob");
 
 /**
  * @swagger
@@ -109,11 +107,27 @@ router.get("/deals/:id", async (req, res) => {
  *       400:
  *         description: Requête invalide
  */
-router.post("/deals", async (req, res) => {
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+router.post("/deals", upload.array("image", 3), async (req, res) => {
   try {
     const deal = req.body;
-    await db("deals").insert(deal).returning("id");
-    res.status(201).send("Deal créé avec succès");
+
+    const images = req.files.map((file) => ({
+      filename: file.originalname,
+      data: file.buffer,
+    }));
+
+    // attach image to the deal but image1 image2 image3
+    deal.image1 = images[0]?.data;
+    deal.image2 = images[1]?.data;
+    deal.image3 = images[2]?.data;
+
+    // Insert the deal into the database
+    const insertedDeal = await db("deals").insert(deal).returning("id");
+
+    res.status(201).send({ id: insertedDeal[0] });
   } catch (error) {
     console.error("Erreur lors de la création du deal : ", error);
     res.status(500).send("Erreur serveur");
@@ -199,77 +213,5 @@ router.delete("/deals/:id", async (req, res) => {
     res.status(500).send("Erreur serveur");
   }
 });
-
-/**
- * @swagger
- * /deals/upload-image:
- *   post:
- *     summary: Uploader une image pour un deal
- *     tags: [Deals]
- *     requestBody:
- *       description: Image à uploader
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               dealId:
- *                 type: integer
- *               image:
- *                 type: string  # Remplacez par le type approprié selon votre cas
- *             required:
- *               - dealId
- *               - image
- *     responses:
- *       201:
- *         description: Image uploadée avec succès
- *       400:
- *         description: Requête invalide
- */
-const storage = multer.memoryStorage(); // Use memory storage for file buffer
-const upload = multer({ storage: storage });
-
-// Use multer middleware to handle the file uploads
-router.post(
-  "/deals/upload-image",
-  upload.array("images", 3),
-  async (req, res) => {
-    try {
-      // Check if req.files is available and not empty
-      if (!req.files || req.files.length === 0) {
-        throw new Error("No files uploaded");
-      }
-
-      // Loop through each file and upload to blob storage
-      const uploadPromises = req.files.map(async (file) => {
-        const dealId = req.body.dealId || "unknown";
-        const timestamp = Date.now();
-        const filename = `${dealId}-${timestamp}${path.extname(
-          file.originalname
-        )}`;
-
-        // Use Vercel Blob put function to upload the file
-        const blob = await put(filename, file.buffer, {
-          access: "public",
-        });
-
-        // You may want to store the blob URLs or other information in your database
-        return blob.url;
-      });
-
-      // Wait for all uploads to complete
-      const blobUrls = await Promise.all(uploadPromises);
-
-      console.log("Files uploaded to Blob Storage:", blobUrls);
-
-      // Respond with the blob URLs or other relevant information
-      res.status(201).json({ blobUrls });
-    } catch (error) {
-      console.error("Error uploading images to Blob Storage:", error.message);
-      res.status(500).json({ error: "Error uploading images to Blob Storage" });
-    }
-  }
-);
 
 module.exports = router;
