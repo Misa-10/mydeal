@@ -113,15 +113,11 @@ const CreateDeal = () => {
       dealData.append("creator_id", parseInt(user_id));
 
       formData.images.forEach((file) => {
-        dealData.append("image", file); // Use the correct field name (image)
+        dealData.append("image", file);
       });
-
-      console.log(dealData);
-      console.log(formData);
 
       const response = await axios.post("/deals", dealData);
 
-      console.log(response.data);
       navigate(`/deals/${response.data.id}`);
       showToast("success", "Deal créé avec succès");
     } catch (error) {

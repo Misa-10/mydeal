@@ -15,9 +15,6 @@ const Home = () => {
     try {
       setLoading(true);
       const response = await axios.get(`deals?page=${page}`);
-      console.log(response.data);
-    
-
 
       setDeals(response.data.deals);
       setTotalPages(response.data.totalPages);

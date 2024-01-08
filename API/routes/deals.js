@@ -160,10 +160,23 @@ router.post("/deals", upload.array("image", 3), async (req, res) => {
  *       404:
  *         description: Deal non trouvé
  */
-router.put("/deals/:id", async (req, res) => {
+
+router.put("/deals/:id", upload.array("image", 3), async (req, res) => {
   try {
     const dealId = req.params.id;
     const updatedDeal = req.body;
+
+    const images = req.files.map((file) => ({
+      filename: file.originalname,
+      data: file.buffer,
+    }));
+
+    // attach image to the deal but image1 image2 image3
+    updatedDeal.image1 = images[0]?.data;
+    updatedDeal.image2 = images[1]?.data;
+    updatedDeal.image3 = images[2]?.data;
+
+   
 
     const result = await db("deals").where("id", dealId).update(updatedDeal);
 

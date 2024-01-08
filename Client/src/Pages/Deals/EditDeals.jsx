@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
 import Auth from "../../Middleware/Auth";
+import { Buffer } from "buffer";
 
 const EditDeal = () => {
   const [formData, setFormData] = useState({
@@ -28,7 +29,6 @@ const EditDeal = () => {
 
   const [isPermanent, setIsPermanent] = useState(false);
   const { id } = useParams();
-  console.log(id);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,7 +60,18 @@ const EditDeal = () => {
           response.data.image3,
         ].filter((image) => image);
 
-        setImagePreviews(images.map((image) => `${BaseAPIurl}images/${image}`));
+        setImagePreviews(
+          images.map((image) => {
+            if (typeof image === "object" && image.data) {
+              return Buffer.from(image.data, "binary").toString("base64");
+            } else if (image == null) {
+              console.error("Image is null ");
+            } else {
+              console.error("Unsupported image format:", image);
+              throw new Error("Unsupported image format");
+            }
+          })
+        );
 
         setFormData({ ...formattedData, images });
       } catch (error) {
@@ -116,8 +127,6 @@ const EditDeal = () => {
     const updatedPreviews = [...imagePreviews];
     updatedPreviews.splice(index, 1);
 
-    console.log(formData.images);
-
     const updatedImages = [...formData.images];
     updatedImages.splice(index, 1);
 
@@ -129,8 +138,6 @@ const EditDeal = () => {
     e.preventDefault();
 
     try {
-      const imageUrls = await uploadImages();
-
       const jwtToken = localStorage.getItem("jwtToken");
       const decoded = jwtToken ? jwtDecode(jwtToken) : null;
       const user_id = decoded.id;
@@ -138,24 +145,31 @@ const EditDeal = () => {
       const formattedStartDate = `${formData.start_date} ${formData.start_time}:00+00`;
       const formattedEndDate = `${formData.end_date} ${formData.end_time}:00+00`;
 
-      const dealDataWithImages = {
-        title: formData.title,
-        description: formData.description,
-        start_date: formData.permanent == false ? formattedStartDate : null,
-        end_date: formData.permanent == false ? formattedEndDate : null,
-        price: formData.price,
-        link: formData.link,
-        shipping_cost: formData.shipping_cost,
-        base_price: formData.base_price,
-        brand: formData.brand,
-        image1: imageUrls[0] || null,
-        image2: imageUrls[1] || null,
-        image3: imageUrls[2] || null,
-        permanent: formData.permanent,
-        creator_id: parseInt(user_id),
-      };
+      const dealData = new FormData();
 
-      await axios.put(`deals/${id}`, dealDataWithImages);
+      dealData.append("title", formData.title);
+      dealData.append("description", formData.description);
+      if (formData.permanent === false) {
+        dealData.append("start_date", formattedStartDate);
+        dealData.append("end_date", formattedEndDate);
+      }
+      dealData.append("price", formData.price);
+      dealData.append("link", formData.link);
+      dealData.append("shipping_cost", formData.shipping_cost);
+      dealData.append("base_price", formData.base_price);
+      dealData.append("brand", formData.brand);
+      dealData.append("permanent", formData.permanent);
+      dealData.append("creator_id", parseInt(user_id));
+
+      formData.images.forEach((file, index) => {
+        if (file instanceof File) {
+          dealData.append("image", file);
+        } else if (file instanceof Object) {
+          dealData.append(`image${index + 1}`, file);
+        }
+      });
+
+      await axios.put(`deals/${id}`, dealData);
 
       showToast("success", "Deal modifié avec succès");
 
@@ -163,27 +177,6 @@ const EditDeal = () => {
     } catch (error) {
       showToast("error", "Erreur lors de la modification du deal");
       console.error("Erreur lors de la modification du deal :", error);
-    }
-  };
-
-  const uploadImages = async () => {
-    try {
-      const formDataToUpload = new FormData();
-
-      for (let i = 0; i < formData.images.length; i++) {
-        formDataToUpload.append(`images`, formData.images[i]);
-      }
-
-      const response = await axios.post("deals/upload-image", formDataToUpload);
-
-      const filenames = response.data.filenames;
-
-      const imageUrls = filenames.map((filename) => `${filename}`);
-
-      return imageUrls;
-    } catch (error) {
-      console.error("Erreur lors de l'envoi des images :", error);
-      throw new Error("Erreur lors de l'envoi des images");
     }
   };
 
@@ -208,9 +201,6 @@ const EditDeal = () => {
   const handlePrevPage = () => {
     setCurrentPage(1);
   };
-
-  // eslint-disable-next-line no-undef
-  const BaseAPIurl = process.env.REACT_APP_API_BASE_URL;
 
   return (
     <div className="bg-background flex items-center justify-center h-he1">
@@ -472,7 +462,11 @@ const EditDeal = () => {
               {imagePreviews.map((preview, index) => (
                 <div key={index} className="mb-4 ml-4">
                   <img
-                    src={preview}
+                    src={
+                      preview.startsWith("data")
+                        ? preview
+                        : `data:image/png;base64,${preview}`
+                    }
                     alt={`Preview ${index + 1}`}
                     className="max-w-xs h-auto object-cover w-40"
                   />
