@@ -29,16 +29,22 @@ const multer = require("multer");
  */
 router.get("/deals", async (req, res) => {
   try {
-    const { page = 1, pageSize = 2 } = req.query;
+    const { page = 1, pageSize = 2, name } = req.query;
     const offset = (page - 1) * pageSize;
 
-    const deals = await db
-      .select("*")
-      .from("deals")
-      .offset(offset)
-      .limit(pageSize);
+    let query = db.select("*").from("deals");
 
-    const totalCount = await db("deals").count("*").first();
+    if (name) {
+      query = query.where("title", "ilike", `%${name}%`);
+    }
+
+    const deals = await query.offset(offset).limit(pageSize);
+
+    const totalCountQuery = name
+      ? db("deals").where("title", "ilike", `%${name}%`).count("*").first()
+      : db("deals").count("*").first();
+
+    const totalCount = await totalCountQuery;
 
     const totalPages = Math.ceil(totalCount.count / pageSize);
 
@@ -175,8 +181,6 @@ router.put("/deals/:id", upload.array("image", 3), async (req, res) => {
     updatedDeal.image1 = images[0]?.data;
     updatedDeal.image2 = images[1]?.data;
     updatedDeal.image3 = images[2]?.data;
-
-   
 
     const result = await db("deals").where("id", dealId).update(updatedDeal);
 

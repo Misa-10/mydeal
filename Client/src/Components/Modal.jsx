@@ -77,7 +77,6 @@ const Modal = ({ onClose }) => {
       .then(function (response) {
         const { token } = response.data;
 
-        // Save the token to localStorage or a secure storage method
         localStorage.setItem("jwtToken", token);
         if (isLogin) {
           showToast("success", "Vous êtes connecté");

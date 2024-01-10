@@ -98,7 +98,6 @@ const EditDeal = () => {
     const previews = [...imagePreviews];
     let formDataImages = formData.images || [];
 
-    // Limiter à un maximum de 3 images
     const remainingSlots = 3 - formDataImages.length;
     const filesToAdd = Array.from(files).slice(0, remainingSlots);
 

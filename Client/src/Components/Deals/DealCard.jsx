@@ -1,4 +1,3 @@
-// DealCard.jsx
 import React from "react";
 import { FaTruck } from "react-icons/fa";
 import { Buffer } from "buffer";
@@ -31,7 +30,9 @@ const DealCard = ({ deal }) => {
       }}
     >
       <div className="flex justify-around items-center mb-4">
-        <h2 className="text-2xl font-bold text-primary mb-2">{deal.title}</h2>
+        <h2 className="text-2xl font-bold text-primary mb-2 max-lg:text-xl">
+          {deal.title}
+        </h2>
         <img
           src={`data:image/png;base64,${image1}`}
           alt={`Deal ${deal.title}`}
@@ -44,31 +45,35 @@ const DealCard = ({ deal }) => {
 
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center">
-          <span className="text-lg text-accent">
+          <span className="text-lg text-accent max-lg:text-base">
             <s className="text-gray-500">{deal.base_price} €</s>{" "}
             <span className="text-primary">→ {deal.price} €</span>
           </span>
         </div>
         <div className="flex items-center">
           <FaTruck className="mr-2 text-primary" />
-          <span className="text-lg text-primary">{deal.shipping_cost} €</span>
+          <span className="text-lg text-primary max-lg:text-base">
+            {deal.shipping_cost} €
+          </span>
         </div>
       </div>
 
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center max-lg:flex-col">
         {deal.permanent === false ? (
-          <span className="text-lg text-primary">
+          <span className="text-lg text-primary max-lg:text-base">
             Du {startDate} au {endDate}
           </span>
         ) : deal.permanent === true ? (
-          <span className="text-lg text-primary">Offre permanente</span>
+          <span className="text-lg text-primary max-lg:text-base">
+            Offre permanente
+          </span>
         ) : null}
 
         <a
           href={deal.link}
           target="_blank"
           rel="noopener noreferrer"
-          className="bg-primary text-text px-4 py-2 rounded hover:bg-accent text-lg"
+          className="bg-primary text-text px-4 py-2 rounded hover:bg-accent text-lg max-2xl:text-base max-lg:mt-4"
         >
           Voir le deal
         </a>

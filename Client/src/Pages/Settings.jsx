@@ -270,7 +270,7 @@ const Settings = () => {
                 name="newPassword"
                 value={formData.newPassword}
                 onChange={handleInputChange}
-                className="w-full p-2 rounded bg-fade text-text focus:outline-none pr-10" // Add right padding for the icon
+                className="w-full p-2 rounded bg-fade text-text focus:outline-none pr-10"
               />
               {showPassword ? (
                 <IoIosEyeOff
