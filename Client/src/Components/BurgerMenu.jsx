@@ -30,7 +30,7 @@ const BurgerMenu = ({ isOpen, onClose }) => {
   return (
     <div
       ref={menuBurgerRef}
-      className={`fixed right-0 top-24 h-full flex flex-col justify-between bg-secondary p-6 w-1/3 z-50 rounded-b-lg max-sm:top-20 p-3 ${
+      className={`fixed right-0 top-24 flex flex-col justify-between bg-secondary p-6 w-1/3 z-50 rounded-b-lg max-sm:top-20 p-3 ${
         isOpen ? "block" : "hidden"
       }`}
     >
