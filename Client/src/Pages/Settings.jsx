@@ -178,8 +178,8 @@ const Settings = () => {
   };
 
   return (
-    <div className="bg-background flex items-center justify-center h-he1">
-      <div className="bg-secondary p-8 rounded-lg w-full max-w-md animate-fade-up animate-once animate-delay-100">
+    <div className="bg-background flex items-center justify-center m-auto">
+      <div className="bg-secondary p-8 rounded-lg w-full max-w-md animate-fade-up animate-once animate-delay-100 max-sm:p-4 max-sm:mx-2 ">
         <h2 className="text-3xl text-primary mb-4">Settings</h2>
         <form>
           <div className="mb-4">

@@ -4,7 +4,7 @@ import Modal from "./Modal";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import BurgerMenu from "./BurgerMenu";
-import { FaCog, FaSignOutAlt, FaBars } from "react-icons/fa";
+import { FaCog, FaSignOutAlt, FaBars, FaUserAlt } from "react-icons/fa";
 import _debounce from "lodash/debounce";
 
 const Navbar = ({ onDataFromNavbar }) => {
@@ -74,7 +74,7 @@ const Navbar = ({ onDataFromNavbar }) => {
 
   return (
     <>
-      <div className="bg-secondary p-4 flex justify-between items-center ">
+      <div className="bg-secondary p-4 flex justify-evenly items-center max-sm:p-2">
         <img
           src="http://localhost:3000/BlueDeals.png"
           alt="Logo"
@@ -104,7 +104,7 @@ const Navbar = ({ onDataFromNavbar }) => {
           >
             Créer un Code Promo
           </button> */}
-            <div className="rounded-full overflow-hidden w-12 h-12">
+            <div className="rounded-full overflow-hidden w-12 h-12  max-[425px]:hidden">
               <img
                 src={`https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${userData.avatar}`}
                 alt="Profile"
@@ -138,9 +138,10 @@ const Navbar = ({ onDataFromNavbar }) => {
         ) : (
           <button
             onClick={openModal}
-            className="bg-variant-700 text-text py-2 px-4 rounded hover:bg-variant-600 focus:outline-none"
+            className="bg-variant-700 text-text py-2 px-4 rounded hover:bg-variant-600 focus:outline-none max-sm:ml-1"
           >
-            Connexion / Créer un compte
+            <span className="max-sm:hidden">Connexion / Créer un compte</span>
+            <FaUserAlt size={20} className="sm:hidden" />
           </button>
         )}
 

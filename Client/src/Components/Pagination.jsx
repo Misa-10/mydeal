@@ -16,6 +16,9 @@ const Pagination = ({ totalPages, onPageChange }) => {
       <div className="flex flex-1 justify-between sm:hidden">
         <a
           href="#"
+          onClick={() =>
+            handlePageChange(activePage === 1 ? activePage : activePage - 1)
+          }
           className="relative inline-flex items-center rounded-md   bg-primary px-4 py-2 text-sm font-medium text-text hover:bg-accent"
         >
           Previous
@@ -23,6 +26,11 @@ const Pagination = ({ totalPages, onPageChange }) => {
         <a
           href="#"
           className="relative ml-3 inline-flex items-center rounded-md   bg-primary px-4 py-2 text-sm font-medium text-text hover:bg-accent"
+          onClick={() =>
+            handlePageChange(
+              activePage === totalPages ? activePage : activePage + 1
+            )
+          }
         >
           Next
         </a>

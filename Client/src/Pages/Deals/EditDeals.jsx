@@ -194,19 +194,328 @@ const EditDeal = () => {
   };
 
   const handleNextPage = () => {
-    setCurrentPage(2);
+    setCurrentPage(currentPage + 1);
   };
 
   const handlePrevPage = () => {
-    setCurrentPage(1);
+    setCurrentPage(currentPage - 1);
   };
 
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSmallScreen(window.innerWidth < 640);
+    };
+
+    handleResize(); // Initialize with current window width
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   return (
-    <div className="bg-background flex items-center justify-center h-he1">
-      <div className="bg-secondary p-8 rounded-lg w-full max-w-2xl animate-fade-up animate-once animate-delay-100">
+    <div className="bg-background flex items-center justify-center m-auto">
+      <div className="bg-secondary p-8 rounded-lg w-full max-w-2xl animate-fade-up animate-once animate-delay-100 max-md:mx-2 max-[375px]:p-4">
         <h2 className="text-3xl text-primary mb-4">Modifier le Deal</h2>
-        {currentPage === 1 && (
-          <form onSubmit={handleNextPage} className="flex flex-wrap">
+        {currentPage === 1 && isSmallScreen === false && (
+          <form onSubmit={handleNextPage} className="flex-col">
+            <div className="flex">
+              <div className="w-full md:w-1/2 pr-4">
+                <div className="block text-text mb-1">
+                  <label
+                    htmlFor="title"
+                    className="block text-sm font-medium text-text"
+                  >
+                    Titre
+                  </label>
+                  <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    className="w-full p-2 rounded bg-fade text-text focus:outline-none"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label
+                    htmlFor="description"
+                    className="block text-sm font-medium text-text"
+                  >
+                    Description
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    className="w-full p-2 rounded bg-fade text-text focus:outline-none"
+                    style={{ resize: "none" }}
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <div className="flex items-center">
+                    <label className="inline-flex items-center">
+                      <input
+                        type="radio"
+                        name="permanent"
+                        value="true"
+                        checked={isPermanent}
+                        onChange={handleChange}
+                        className="form-radio h-5 w-5 text-primary"
+                      />
+                      <span className="ml-2 text-text">Permanent</span>
+                    </label>
+                    <label className="inline-flex items-center ml-4">
+                      <input
+                        type="radio"
+                        name="permanent"
+                        value="false"
+                        checked={!isPermanent}
+                        onChange={handleChange}
+                        className="form-radio h-5 w-5 text-primary"
+                      />
+                      <span className="ml-2 text-text">Non Permanent</span>
+                    </label>
+                  </div>
+                </div>
+                {!isPermanent && (
+                  <>
+                    <div className="mb-4">
+                      <label
+                        htmlFor="start_date"
+                        className="block text-sm font-medium text-text"
+                      >
+                        Date de début
+                      </label>
+                      <input
+                        type="date"
+                        id="start_date"
+                        name="start_date"
+                        value={formData.start_date}
+                        onChange={handleChange}
+                        className={`w-full p-2 rounded bg-fade text-text focus:outline-none dark:[color-scheme:dark]`}
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label
+                        htmlFor="end_date"
+                        className="block text-sm font-medium text-text"
+                      >
+                        Date de fin
+                      </label>
+                      <input
+                        type="date"
+                        id="end_date"
+                        name="end_date"
+                        value={formData.end_date}
+                        onChange={handleChange}
+                        className={`w-full p-2 rounded bg-fade text-text focus:outline-none dark:[color-scheme:dark] `}
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label
+                        htmlFor="start_time"
+                        className="block text-sm font-medium text-text"
+                      >
+                        Heure de début
+                      </label>
+                      <input
+                        type="time"
+                        id="start_time"
+                        name="start_time"
+                        value={formData.start_time}
+                        onChange={handleChange}
+                        className={`w-full p-2 rounded bg-fade text-text focus:outline-none dark:[color-scheme:dark]`}
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label
+                        htmlFor="end_time"
+                        className="block text-sm font-medium text-text"
+                      >
+                        Heure de fin
+                      </label>
+                      <input
+                        type="time"
+                        id="end_time"
+                        name="end_time"
+                        value={formData.end_time}
+                        onChange={handleChange}
+                        className={`w-full p-2 rounded bg-fade text-text focus:outline-none dark:[color-scheme:dark]`}
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+              <div className="w-full md:w-1/2 pl-4">
+                <div className="mb-4">
+                  <label
+                    htmlFor="link"
+                    className="block text-sm font-medium text-text"
+                  >
+                    Lien
+                  </label>
+                  <input
+                    type="text"
+                    id="link"
+                    name="link"
+                    value={formData.link}
+                    onChange={handleChange}
+                    className="w-full p-2 rounded bg-fade text-text focus:outline-none"
+                    required
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label
+                    htmlFor="shipping_cost"
+                    className="block text-sm font-medium text-text"
+                  >
+                    Frais de port
+                  </label>
+                  <input
+                    type="number"
+                    id="shipping_cost"
+                    name="shipping_cost"
+                    value={formData.shipping_cost}
+                    onChange={handleChange}
+                    className="w-full p-2 rounded bg-fade text-text focus:outline-none"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label
+                    htmlFor="brand"
+                    className="block text-sm font-medium text-text"
+                  >
+                    Marque
+                  </label>
+                  <input
+                    type="text"
+                    id="brand"
+                    name="brand"
+                    value={formData.brand}
+                    onChange={handleChange}
+                    className="w-full p-2 rounded bg-fade text-text focus:outline-none"
+                    required
+                  />
+                </div>
+                <div className="flex items-center mb-4">
+                  <div className="w-1/2 pr-2">
+                    <label
+                      htmlFor="price"
+                      className="block text-sm font-medium text-text"
+                    >
+                      Prix
+                    </label>
+                    <input
+                      type="number"
+                      id="price"
+                      name="price"
+                      value={formData.price}
+                      onChange={handleChange}
+                      className="w-full p-2 rounded bg-fade text-text focus:outline-none"
+                      required
+                    />
+                  </div>
+                  <div className="w-1/2 pl-2">
+                    <label
+                      htmlFor="base_price"
+                      className="block text-sm font-medium text-text"
+                    >
+                      Prix de base
+                    </label>
+                    <input
+                      type="number"
+                      id="base_price"
+                      name="base_price"
+                      value={formData.base_price}
+                      onChange={handleChange}
+                      className="w-full p-2 rounded bg-fade text-text focus:outline-none"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleNextPage}
+              className="bg-primary text-text px-4 py-2 rounded hover:bg-accent focus:outline-none"
+            >
+              Suivant
+            </button>
+          </form>
+        )}
+        {(currentPage === 2 && isSmallScreen == false) ||
+          (currentPage === 3 && isSmallScreen == true && (
+            <form onSubmit={handleSubmit}>
+              <div className="mb-4 ">
+                <label
+                  htmlFor="images"
+                  className="block text-sm font-medium text-text"
+                >
+                  Images
+                </label>
+                <input
+                  type="file"
+                  id="images"
+                  name="images"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  multiple
+                  className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-primary text-text"
+                />
+              </div>
+
+              <div className="flex flex-wrap -mx-2">
+                {imagePreviews.map((preview, index) => (
+                  <div key={index} className="mb-4 ml-4">
+                    <img
+                      src={
+                        preview.startsWith("data")
+                          ? preview
+                          : `data:image/png;base64,${preview}`
+                      }
+                      alt={`Preview ${index + 1}`}
+                      className="max-w-xs h-auto object-cover w-40"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(index)}
+                      className="mt-2 bg-red-500 text-text px-4 py-2 rounded hover:bg-red-700 focus:outline-none"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={handlePrevPage}
+                className="mr-2 bg-secondary text-text px-4 py-2 rounded hover:bg-accent focus:outline-none"
+              >
+                Précédent
+              </button>
+
+              <button
+                type="submit"
+                className="bg-primary text-text px-4 py-2 rounded hover:bg-accent focus:outline-none"
+              >
+                Modifier le Deal
+              </button>
+            </form>
+          ))}
+        {currentPage === 1 && isSmallScreen === true && (
+          <form onSubmit={handleNextPage} className="flex-col">
             <div className="w-full md:w-1/2 pr-4">
               <div className="block text-text mb-1">
                 <label
@@ -337,6 +646,18 @@ const EditDeal = () => {
                 </>
               )}
             </div>
+            <button
+              type="button"
+              onClick={handleNextPage}
+              className="bg-primary text-text px-4 py-2 rounded hover:bg-accent focus:outline-none"
+            >
+              Suivant
+            </button>
+          </form>
+        )}
+
+        {currentPage === 2 && isSmallScreen == true && (
+          <form onSubmit={handleNextPage} className="flex-col">
             <div className="w-full md:w-1/2 pl-4">
               <div className="mb-4">
                 <label
@@ -430,58 +751,6 @@ const EditDeal = () => {
 
             <button
               type="button"
-              onClick={handleNextPage}
-              className="bg-primary text-text px-4 py-2 rounded hover:bg-accent focus:outline-none"
-            >
-              Suivant
-            </button>
-          </form>
-        )}
-        {currentPage === 2 && (
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4 ">
-              <label
-                htmlFor="images"
-                className="block text-sm font-medium text-text"
-              >
-                Images
-              </label>
-              <input
-                type="file"
-                id="images"
-                name="images"
-                accept="image/*"
-                onChange={handleImageChange}
-                multiple
-                className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-primary text-text"
-              />
-            </div>
-
-            <div className="flex flex-wrap -mx-2">
-              {imagePreviews.map((preview, index) => (
-                <div key={index} className="mb-4 ml-4">
-                  <img
-                    src={
-                      preview.startsWith("data")
-                        ? preview
-                        : `data:image/png;base64,${preview}`
-                    }
-                    alt={`Preview ${index + 1}`}
-                    className="max-w-xs h-auto object-cover w-40"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveImage(index)}
-                    className="mt-2 bg-red-500 text-text px-4 py-2 rounded hover:bg-red-700 focus:outline-none"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            <button
-              type="button"
               onClick={handlePrevPage}
               className="mr-2 bg-secondary text-text px-4 py-2 rounded hover:bg-accent focus:outline-none"
             >
@@ -489,10 +758,11 @@ const EditDeal = () => {
             </button>
 
             <button
-              type="submit"
+              type="button"
+              onClick={handleNextPage}
               className="bg-primary text-text px-4 py-2 rounded hover:bg-accent focus:outline-none"
             >
-              Modifier le Deal
+              Suivant
             </button>
           </form>
         )}

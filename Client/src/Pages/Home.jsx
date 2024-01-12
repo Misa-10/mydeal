@@ -33,7 +33,7 @@ const Home = ({ SearchbarTerm }) => {
   return (
     <div className="bg-background text-text">
       <div className="container mx-auto p-4">
-        <h1 className="text-4xl font-bold mb-8 max-lg:text-3xl">
+        <h1 className="text-4xl font-bold mb-8 max-lg:text-3xl max-md:mb-4">
           Les dernières offres
         </h1>
 

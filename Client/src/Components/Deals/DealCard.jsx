@@ -24,7 +24,7 @@ const DealCard = ({ deal }) => {
 
   return (
     <div
-      className="bg-secondary p-6 mb-6 rounded-lg shadow-lg hover:shadow-2xl transition duration-300 ease-in-out transform hover:scale-105 cursor-pointer"
+      className="bg-secondary p-6 mb-6 rounded-lg shadow-lg hover:shadow-2xl transition duration-300 ease-in-out transform hover:scale-105 cursor-pointer max-md:mb-3 max-sm:p-3"
       onClick={() => {
         window.location.href = `/deal/${deal.id}`;
       }}

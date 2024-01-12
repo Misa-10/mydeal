@@ -26,9 +26,6 @@ module.exports = {
         },
       },
     },
-    height: {
-      he1: "90.3vh",
-    },
   },
   plugins: [require("tailwindcss-animated")],
 };
