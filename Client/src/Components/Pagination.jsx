@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaChevronRight, FaChevronLeft } from "react-icons/fa";
 
-const Pagination = ({ totalPages, onPageChange }) => {
+const Pagination = ({ totalPages, onPageChange, totalResults }) => {
   const [activePage, setActivePage] = useState(1);
 
   const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
@@ -38,9 +38,8 @@ const Pagination = ({ totalPages, onPageChange }) => {
       <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
         <div>
           <p className="text-sm text-white">
-            Showing <span className="font-medium">1</span> to{" "}
-            <span className="font-medium">10</span> of{" "}
-            <span className="font-medium">97</span> results
+            Affichage de <span className="font-medium">{totalResults}</span>{" "}
+            résultats.
           </p>
         </div>
         <div>

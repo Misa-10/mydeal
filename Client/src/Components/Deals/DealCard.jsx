@@ -30,7 +30,7 @@ const DealCard = ({ deal }) => {
       }}
     >
       <div className="flex justify-around items-center mb-4">
-        <h2 className="text-2xl font-bold text-primary mb-2 max-lg:text-xl">
+        <h2 className="text-2xl font-bold text-primary mb-2 max-lg:text-xl mr-1">
           {deal.title}
         </h2>
         <img
@@ -40,7 +40,9 @@ const DealCard = ({ deal }) => {
         />
       </div>
       <div className="flex justify-center items-center mb-4">
-        <p className="text-text mb-2">{deal.description}</p>
+        <p className="text-text mb-2 overflow-hidden overflow-ellipsis h-20 line-clamp-4">
+          {deal.description}
+        </p>
       </div>
 
       <div className="flex justify-between items-center mb-4">

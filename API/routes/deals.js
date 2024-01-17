@@ -48,7 +48,7 @@ router.get("/deals", async (req, res) => {
 
     const totalPages = Math.ceil(totalCount.count / pageSize);
 
-    res.json({ deals, totalPages });
+    res.json({ deals, totalPages, totalCount: totalCount.count });
   } catch (error) {
     console.error("Erreur lors de la récupération des deals : ", error);
     res.status(500).send("Erreur serveur");

@@ -9,6 +9,7 @@ const Home = ({ SearchbarTerm }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(20);
   const [loading, setLoading] = useState(false);
+  const [totalResults, setTotalResults] = useState(0);
 
   const fetchDeals = async (page) => {
     try {
@@ -19,6 +20,7 @@ const Home = ({ SearchbarTerm }) => {
 
       setDeals(response.data.deals);
       setTotalPages(response.data.totalPages);
+      setTotalResults(response.data.totalCount);
     } catch (error) {
       console.error("Erreur lors de la récupération des deals :", error);
     } finally {
@@ -48,6 +50,7 @@ const Home = ({ SearchbarTerm }) => {
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={setCurrentPage}
+        totalResults={totalResults}
       />
     </div>
   );

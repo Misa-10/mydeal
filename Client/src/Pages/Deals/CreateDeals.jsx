@@ -117,7 +117,7 @@ const CreateDeal = () => {
 
       const response = await axios.post("/deals", dealData);
 
-      navigate(`/deals/${response.data.id}`);
+      navigate(`/deal/${response.data.id.id}`);
       showToast("success", "Deal créé avec succès");
     } catch (error) {
       showToast("error", "Erreur lors de la création du deal");
@@ -392,62 +392,62 @@ const CreateDeal = () => {
             </button>
           </form>
         )}
-        {(currentPage === 2 && isSmallScreen == false) ||
-          (currentPage === 3 && isSmallScreen == true && (
-            <form onSubmit={handleSubmit}>
-              <div className="mb-4 ">
-                <label
-                  htmlFor="images"
-                  className="block text-sm font-medium text-text"
-                >
-                  Images
-                </label>
-                <input
-                  type="file"
-                  id="images"
-                  name="images"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  multiple
-                  className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-primary text-text"
-                />
-              </div>
-
-              <div className="flex flex-wrap -mx-2">
-                {imagePreviews.map((preview, index) => (
-                  <div key={index} className="mb-4 ml-4">
-                    <img
-                      src={preview}
-                      alt={`Preview ${index + 1}`}
-                      className="max-w-xs h-auto object-cover w-40"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage(index)}
-                      className="mt-2 bg-red-500 text-text px-4 py-2 rounded hover:bg-red-700 focus:outline-none"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              <button
-                type="button"
-                onClick={handlePrevPage}
-                className="mr-2 bg-secondary text-text px-4 py-2 rounded hover:bg-accent focus:outline-none"
+        {((currentPage === 2 && isSmallScreen == false) ||
+          (currentPage === 3 && isSmallScreen == true)) && (
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4 ">
+              <label
+                htmlFor="images"
+                className="block text-sm font-medium text-text"
               >
-                Précédent
-              </button>
+                Images
+              </label>
+              <input
+                type="file"
+                id="images"
+                name="images"
+                accept="image/*"
+                onChange={handleImageChange}
+                multiple
+                className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-primary text-text"
+              />
+            </div>
 
-              <button
-                type="submit"
-                className="bg-primary text-text px-4 py-2 rounded hover:bg-accent focus:outline-none"
-              >
-                Créer le Deal
-              </button>
-            </form>
-          ))}
+            <div className="flex flex-wrap -mx-2">
+              {imagePreviews.map((preview, index) => (
+                <div key={index} className="mb-4 ml-4">
+                  <img
+                    src={preview}
+                    alt={`Preview ${index + 1}`}
+                    className="max-w-xs h-auto object-cover w-40"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(index)}
+                    className="mt-2 bg-red-500 text-text px-4 py-2 rounded hover:bg-red-700 focus:outline-none"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={handlePrevPage}
+              className="mr-2 bg-secondary text-text px-4 py-2 rounded hover:bg-accent focus:outline-none"
+            >
+              Précédent
+            </button>
+
+            <button
+              type="submit"
+              className="bg-primary text-text px-4 py-2 rounded hover:bg-accent focus:outline-none"
+            >
+              Créer le Deal
+            </button>
+          </form>
+        )}
 
         {currentPage === 1 && isSmallScreen === true && (
           <form onSubmit={handleNextPage} className="flex-col">
