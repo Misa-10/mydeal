@@ -80,7 +80,7 @@ const Navbar = ({ onDataFromNavbar }) => {
     <>
       <div className="bg-secondary p-4 flex justify-evenly items-center max-sm:p-2">
         <img
-          src="http://localhost:3000/BlueDeals.png"
+          src="/logo.png"
           alt="Logo"
           className="cursor-pointer w-16 h-16 rounded"
           onClick={() => navigate("/")}
