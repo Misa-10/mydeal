@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { IoIosEye, IoIosEyeOff } from "react-icons/io";
 
-const Modal = ({ onClose }) => {
+const Modal = ({ onClose, fetchUserData }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     username: "",
@@ -78,11 +78,13 @@ const Modal = ({ onClose }) => {
         const { token } = response.data;
 
         localStorage.setItem("jwtToken", token);
+        fetchUserData();
         if (isLogin) {
           showToast("success", "Vous êtes connecté");
         } else {
           showToast("success", "Votre compte a été créé");
         }
+
         onClose();
       })
       .catch(function (error) {

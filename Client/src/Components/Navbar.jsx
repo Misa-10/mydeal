@@ -28,6 +28,10 @@ const Navbar = ({ onDataFromNavbar }) => {
   };
 
   useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = () => {
     const jwtToken = localStorage.getItem("jwtToken");
     if (jwtToken) {
       setIsLogin(true);
@@ -40,7 +44,7 @@ const Navbar = ({ onDataFromNavbar }) => {
     } else {
       setIsLogin(false);
     }
-  }, []);
+  };
 
   const openModal = () => {
     setModalOpen(true);
@@ -145,7 +149,9 @@ const Navbar = ({ onDataFromNavbar }) => {
           </button>
         )}
 
-        {isModalOpen && <Modal onClose={closeModal} />}
+        {isModalOpen && (
+          <Modal onClose={closeModal} fetchUserData={fetchUserData} />
+        )}
       </div>
       {isMenuOpenBurger && (
         <BurgerMenu isOpen={isMenuOpenBurger} onClose={closeMenuBurger} />

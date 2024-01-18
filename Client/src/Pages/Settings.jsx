@@ -108,6 +108,7 @@ const Settings = () => {
         const token = response.data.token;
         localStorage.removeItem("jwtToken");
         localStorage.setItem("jwtToken", token);
+        setDecodedToken(jwtDecode(token));
         showToast(
           "success",
           "Vos informations ont été mises à jour avec succès."

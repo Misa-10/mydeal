@@ -88,7 +88,7 @@ router.post("/users", async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { email, username, id: userId, avatar: null },
+      { email, username, id: userId.id, avatar: null },
       process.env.JWT_SECRET,
       {
         expiresIn: "200h",
@@ -279,6 +279,7 @@ router.get("/users/:id", async (req, res) => {
 router.put("/users/:id", async (req, res) => {
   try {
     const userId = req.params.id;
+
     const { email, password, username, avatar } = req.body;
 
     // Validation de l'email

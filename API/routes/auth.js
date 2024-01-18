@@ -43,40 +43,39 @@ router.post("/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validate email
     if (!emailRegex.test(email)) {
       return res.status(400).json({ message: "Invalid email format." });
     }
 
-    // Validate password
     if (!passwordRegex.test(password)) {
       return res.status(400).json({ message: "Invalid password format." });
     }
 
-    // Find user by email using Knex
     const user = await db
-      .select("id", "email", "username", "password")
+      .select("id", "email", "username", "password", "avatar")
       .from("users")
       .where("email", email)
       .first();
 
-    // Check if the user exists
     if (!user) {
       return res.status(401).json({ message: "Invalid email." });
     }
 
-    // Check if the password is correct
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       return res.status(401).json({ message: "Invalid password." });
     }
 
-    // Generate JWT token
     const token = jwt.sign(
-      { email: user.email, username: user.username, id: user.id },
+      {
+        email: user.email,
+        username: user.username,
+        id: user.id,
+        avatar: user.avatar,
+      },
       process.env.JWT_SECRET,
       {
-        expiresIn: "200h", // Set the expiration time for the token
+        expiresIn: "200h",
       }
     );
 
